@@ -14,19 +14,19 @@
 (defun blocks/list (&key include-entities (skip-status T))
   "Returns a list of user objects that the authenticating user is blocking.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/blocks/list"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/mute-block-report-users/api-reference/get-blocks-list"
   (map-cursor #'make-user :users *blocks/list* :parameters (prepare* include-entities skip-status)))
 
 (defun blocks/ids ()
   "Returns a list of numeric user ids the authenticating user is blocking.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/blocks/ids"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/mute-block-report-users/api-reference/get-blocks-ids"
   (cursor-collect :ids *blocks/ids*))
 
 (defun blocks/create (&key screen-name user-id include-entities (skip-status T))
   "Blocks the specified user from following the authenticating user. In addition the blocked user will not show in the authenticating users mentions or timeline (unless retweeted by another user). If a follow or friend relationship exists it is destroyed.
 
-According to spec https://dev.twitter.com/docs/api/1.1/post/blocks/create"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/mute-block-report-users/api-reference/post-blocks-create"
   (assert (or screen-name user-id) () "Either SCREEN-NAME or USER-ID are required.")
   (when user-id (assert (numberp user-id) () "USER-ID must be a number."))
   (make-user (signed-request *blocks/create* :parameters (prepare* screen-name user-id include-entities skip-status) :method :POST)))
@@ -34,7 +34,7 @@ According to spec https://dev.twitter.com/docs/api/1.1/post/blocks/create"
 (defun blocks/destroy (&key screen-name user-id include-entities (skip-status T))
   "Un-blocks the user specified in the ID parameter for the authenticating user. Returns the un-blocked user in the requested format when successful. If relationships existed before the block was instated, they will not be restored.
 
-According to spec https://dev.twitter.com/docs/api/1.1/post/blocks/destroy"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/mute-block-report-users/api-reference/post-blocks-destroy"
   (assert (or screen-name user-id) () "Either SCREEN-NAME or USER-ID are required.")
   (when user-id (assert (numberp user-id) () "USER-ID must be a number."))
   (make-user (signed-request *blocks/create* :parameters (prepare* screen-name user-id include-entities skip-status) :method :POST)))
