@@ -39,58 +39,58 @@
 (defun friends/ids (&key user-id screen-name)
   "Returns a list of user IDs for every user the specified user is following (otherwise known as their \"friends\").
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friends/ids"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-followers-ids"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (cursor-collect :ids *friends/ids* :parameters (prepare* user-id screen-name ("count" . "5000")) :method :GET))
 
 (defun friends/list (&key user-id screen-name (skip-status T) (include-user-entities T))
   "Returns a list of user objects for every user the specified user is following (otherwise known as their \"friends\").
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friends/list"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friends-list"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (unless skip-status (setf skip-status "false"))
   (unless include-user-entities (setf include-user-entities "false"))
-  (map-cursor #'make-user :users *friends/list* :parameters (prepare* user-id screen-name skip-status include-user-entities ("count" . "5000")) :method :GET))
+  (map-cursor #'make-user :users *friends/list* :parameters (prepare* user-id screen-name skip-status include-user-entities ("count" . "200")) :method :GET))
 
 (defun followers/ids (&key user-id screen-name)
   "Returns a list of user IDs for every user following the specified user.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/followers/ids"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-followers-ids"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (cursor-collect :ids *followers/ids* :parameters (prepare* user-id screen-name ("count" . "5000")) :method :GET))
 
 (defun followers/list (&key user-id screen-name (skip-status T) (include-user-entities T))
   "Returns a list of user objects for users following the specified user.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/followers/list"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-followers-list"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (unless skip-status (setf skip-status "false"))
   (unless include-user-entities (setf include-user-entities "false"))
-  (map-cursor #'make-user :users *followers/list* :parameters (prepare* user-id screen-name skip-status include-user-entities ("count" . "5000")) :method :GET))
+  (map-cursor #'make-user :users *followers/list* :parameters (prepare* user-id screen-name skip-status include-user-entities ("count" . "200")) :method :GET))
 
 (defun friendships/incoming ()
   "Returns a collection of numeric IDs for every user who has a pending request to follow the authenticating user.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/incoming"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friendships-incoming"
   (cursor-collect :ids *friendships/incoming* :method :GET))
 
 (defun friendships/outgoing ()
   "Returns a collection of numeric IDs for every protected user for whom the authenticating user has a pending follow request.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/outgoing"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friendships-outgoing"
   (cursor-collect :ids *friendships/outgoing* :method :GET))
 
 (defun friendships/create (&key screen-name user-id follow)
   "Allows the authenticating users to follow the user specified in the ID parameter.
 
-According to spec https://dev.twitter.com/docs/api/1.1/post/friendships/create"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (make-user (signed-request *friendships/create* :parameters (prepare* screen-name user-id follow) :method :POST)))
 
 (defun friendships/destroy (&key screen-name user-id)
   "Allows the authenticating user to unfollow the user specified in the ID parameter.
 
-According to spec https://dev.twitter.com/docs/api/1.1/post/friendships/destroy"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-destroy"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (make-user (signed-request *friendships/destroy* :parameters (prepare* screen-name user-id) :method :POST)))
 
@@ -98,7 +98,7 @@ According to spec https://dev.twitter.com/docs/api/1.1/post/friendships/destroy"
   "Allows one to enable or disable retweets and device notifications from the specified user.
 The first return value is the relationship object \"target\", the second \"source\".
 
-According to spec https://dev.twitter.com/docs/api/1.1/post/friendships/update"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-update"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (if d-p (setf device (if device "true" "false")))
   (if r-p (setf retweets (if retweets "true" "false")))
@@ -110,7 +110,7 @@ According to spec https://dev.twitter.com/docs/api/1.1/post/friendships/update"
   "Returns detailed information about the relationship between two arbitrary users.
 The first return value is the relationship object \"target\", the second \"source\".
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/show"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friendships-show"
   (assert (or target-user-id target-screen-name) () "Either TARGET-USER-ID or TARGET-SCREEN-NAME are required.")
   (assert (or source-user-id source-screen-name) () "Either SOURCE-USER-ID or SOURCE-SCREEN-NAME are required.")
   (let ((data (signed-request *friendships/show* :parameters (prepare* target-screen-name target-user-id source-screen-name source-user-id) :method :POST)))
@@ -120,7 +120,7 @@ According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/show"
 (defun friendships/lookup (&key screen-names user-ids)
   "Returns the relationships of the authenticating user to the list of up to 100 screen-names or user-ids provided.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/lookup"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friendships-lookup"
   (assert (or user-ids screen-names) () "Either USER-ID or SCREEN-NAME are required.")
   (when user-ids (setf user-ids (format NIL "~{~a~^,~}" user-ids)))
   (when screen-names (setf screen-names (format NIL "~{~a~^,~}" screen-names)))
@@ -129,5 +129,5 @@ According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/lookup"
 (defun friendships/no-retweets/ids ()
   "Returns a collection of user_ids that the currently authenticated user does not want to receive retweets from.
 
-According to spec https://dev.twitter.com/docs/api/1.1/get/friendships/no_retweets/ids"
+According to spec https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friendships-no_retweets-ids"
   (signed-request *friendships/no-retweets/ids* :method :GET))
