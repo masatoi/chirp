@@ -89,8 +89,6 @@ According to spec https://developer.twitter.com/en/docs/tweets/curate-a-collecti
   "https://developer.twitter.com/en/docs/tweets/curate-a-collection/api-reference/get-collections-list"
   (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
   (labels ((iter (product next-cursor)
-             (print product)
-             (print next-cursor)
              (multiple-value-bind (col-list next)
                  (collections/list-inner :user-id user-id :screen-name screen-name :tweet-id tweet-id
                                          :count 200 :cursor next-cursor)
