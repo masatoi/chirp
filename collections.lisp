@@ -77,14 +77,29 @@ According to spec https://developer.twitter.com/en/docs/tweets/curate-a-collecti
                  :user-id (parse-integer (cdr (assoc :user-id (cdr tl-param))))
                  :name (cdr (assoc :name (cdr tl-param)))))
 
-(defun collections/list (user-id/screen-name &key tweet-id count cursor)
-  "https://developer.twitter.com/en/docs/tweets/curate-a-collection/api-reference/get-collections-list"
+(defun collections/list-inner (&key user-id screen-name tweet-id count cursor)
+  (let* ((params (prepare* user-id screen-name tweet-id count cursor))
+         (res (signed-request *collections/list* :parameters params :method :GET))
+         (timelines (cdr (assoc :timelines (cdr (assoc :objects res)))))
+         (next-cursor (cdr (assoc :next-cursor (cdr (assoc :cursors (cdr (assoc :response res))))))))
+    (values (mapcar #'%make-collection timelines)
+            next-cursor)))
 
-  (let* ((user-id (typecase user-id/screen-name (fixnum user-id/screen-name)))
-         (screen-name (typecase user-id/screen-name (string user-id/screen-name)))
-         (params (prepare* user-id screen-name tweet-id count cursor))
-         (res (signed-request *collections/list* :parameters params :method :GET)))
-    (mapcar #'%make-collection (cdr (assoc :timelines (cdr (assoc :objects res)))))))
+(defun collections/list (&key user-id screen-name tweet-id)
+  "https://developer.twitter.com/en/docs/tweets/curate-a-collection/api-reference/get-collections-list"
+  (assert (or user-id screen-name) () "Either USER-ID or SCREEN-NAME are required.")
+  (labels ((iter (product next-cursor)
+             (print product)
+             (print next-cursor)
+             (multiple-value-bind (col-list next)
+                 (collections/list-inner :user-id user-id :screen-name screen-name :tweet-id tweet-id
+                                         :count 200 :cursor next-cursor)
+               (if (null next)
+                   product
+                   (iter (nconc col-list product) next)))))
+    (multiple-value-bind (col-list next)
+        (collections/list-inner :user-id user-id :screen-name screen-name :tweet-id tweet-id :count 200)
+      (iter col-list next))))
 
 (defun collections/show (id)
   "https://developer.twitter.com/en/docs/tweets/curate-a-collection/api-reference/get-collections-show"
